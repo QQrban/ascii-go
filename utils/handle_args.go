@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var flagPattern = regexp.MustCompile(`^--(output|reverse|color)=([^ ]+)$`)
+var flagPattern = regexp.MustCompile(`^--(output|reverse|color|align)=([^ ]+)$`)
 
 // Updated HandleArgs to return errors.
 func HandleArgs(args string) (string, string) {

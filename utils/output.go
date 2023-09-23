@@ -11,16 +11,13 @@ func Output(text string, asciiArt map[rune][]string, flagValue string, variant i
 		file       *os.File
 		err        error
 		inputValue []string
-		layers     [8]string // Layers to store the ASCII representation for each line.
+		layers     [8]string
 	)
 
-	// Convert the input text into individual characters for ASCII conversion.
 	for _, s := range text {
 		inputValue = append(inputValue, string(s))
 	}
 
-	// If the output file is specified, validate the file extension and create the file.
-	// If not Print Error
 	if variant == 1 {
 		file, err = prepareOutputFile(flagValue)
 		if err != nil {
@@ -47,14 +44,26 @@ func Output(text string, asciiArt map[rune][]string, flagValue string, variant i
 					fmt.Println(layer)
 				}
 			}
-			layers = [8]string{} // Reset layers after printing.
+			layers = [8]string{}
 			i++
+
+			for i+1 < len(inputValue) && inputValue[i+1] == "\\" && i+2 < len(inputValue) && inputValue[i+2] == "n" {
+				if variant == 1 {
+					_, writeErr := file.WriteString("\n")
+					if writeErr != nil {
+						fmt.Println("Error writing to file:", writeErr)
+						os.Exit(1)
+					}
+				} else if variant == 2 {
+					fmt.Println()
+				}
+				i += 2
+			}
+
 			continue
 		}
 
-		// Check if there's ASCII art for the current character.
 		if art, exists := asciiArt[rune(inputValue[i][0])]; exists {
-			// Append each line of ASCII art to the corresponding layer.
 			for j, line := range art {
 				layers[j] += line + " "
 			}

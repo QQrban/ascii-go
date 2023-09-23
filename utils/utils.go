@@ -34,7 +34,7 @@ func WriteFile(args []string) {
 	}
 	flagType, flagValue := HandleArgs(args[1])
 	if IsFlagged(args[1]) {
-		if (flagType == "" || flagValue == "") && flagType != "color" {
+		if (flagType == "" || flagValue == "") && (flagType != "color" && flagType != "align") {
 			fmt.Println("Error: Invalid flag. Use --output=<filename>.txt, --reverse=<filename>.txt")
 			fmt.Println("or --color=<color>")
 			return
@@ -64,8 +64,9 @@ func WriteFile(args []string) {
 			}
 		}
 		selectedColor := checkColor(flagValue)
-
 		Color(textToColor, asciiArt, selectedColor, charsToColor)
+	case "align":
+		Justify(flagValue, text, asciiArt)
 	case "":
 		Output(text, asciiArt, flagValue, 2)
 	}
