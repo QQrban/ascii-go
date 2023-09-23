@@ -82,7 +82,6 @@ func Color(textToColor string, asciiArt map[rune][]string, selectedColor string,
 			return
 		}
 
-		// После обработки каждой строки выводим содержимое слоев и очищаем их для следующей строки
 		for _, layer := range layers {
 			fmt.Println(layer + colors["reset"])
 		}
