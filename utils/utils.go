@@ -51,10 +51,18 @@ func WriteFile(args []string) {
 	case "color":
 		handleErrors(args)
 		var charsToColor []string
+		var textToColor string
+		styles := []string{"standard", "shadow", "thinkertoy"}
 		if len(args[1:]) > 2 {
 			charsToColor = args[2 : len(args)-1]
 		}
-		textToColor := args[len(args)-1]
+		textToColor = args[len(args)-1]
+		for _, prefix := range styles {
+			if strings.HasPrefix(args[len(args)-1], prefix) {
+				textToColor = args[len(args)-2]
+				break
+			}
+		}
 		selectedColor := checkColor(flagValue)
 
 		Color(textToColor, asciiArt, selectedColor, charsToColor)

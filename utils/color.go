@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// ...
+
 func Color(textToColor string, asciiArt map[rune][]string, selectedColor string, charsToColor []string) {
 	var layers [8]string
 
@@ -14,29 +16,19 @@ func Color(textToColor string, asciiArt map[rune][]string, selectedColor string,
 		wordsToColor[s] = true
 	}
 
-	words := strings.Fields(textToColor)
-	for _, word := range words {
-		wordColored := false
+	lines := strings.Split(textToColor, "\\n")
 
-		if wordsToColor[word] {
-			for _, char := range word {
-				if art, exists := asciiArt[char]; exists {
-					for j, line := range art {
-						layers[j] += selectedColor + line + " " + colors["reset"]
-					}
-				} else {
-					fmt.Println("One or more symbols don't exist in ASCII-table!")
-					os.Exit(1)
-				}
-			}
-			wordColored = true
+	for _, line := range lines {
+		if line == "" {
+			fmt.Println()
+			continue
 		}
+		words := strings.Fields(line)
+		for _, word := range words {
+			wordColored := false
 
-		if !wordColored {
-			for _, char := range word {
-				charColored := false
-				if wordsToColor[string(char)] {
-					charColored = true
+			if wordsToColor[word] {
+				for _, char := range word {
 					if art, exists := asciiArt[char]; exists {
 						for j, line := range art {
 							layers[j] += selectedColor + line + " " + colors["reset"]
@@ -46,35 +38,55 @@ func Color(textToColor string, asciiArt map[rune][]string, selectedColor string,
 						os.Exit(1)
 					}
 				}
+				wordColored = true
+			}
 
-				if !charColored {
-					if art, exists := asciiArt[char]; exists {
-						for j, line := range art {
-							layers[j] += line + " "
+			if !wordColored {
+				for _, char := range word {
+					charColored := false
+					if wordsToColor[string(char)] {
+						charColored = true
+						if art, exists := asciiArt[char]; exists {
+							for j, line := range art {
+								layers[j] += selectedColor + line + " " + colors["reset"]
+							}
+						} else {
+							fmt.Println("One or more symbols don't exist in ASCII-table!")
+							os.Exit(1)
 						}
-					} else {
-						fmt.Println("One or more symbols don't exist in ASCII-table!")
-						os.Exit(1)
+					}
+
+					if !charColored {
+						if art, exists := asciiArt[char]; exists {
+							for j, line := range art {
+								layers[j] += line + " "
+							}
+						} else {
+							fmt.Println("One or more symbols don't exist in ASCII-table!")
+							os.Exit(1)
+						}
 					}
 				}
 			}
+
+			for j := range layers {
+				layers[j] += " "
+			}
 		}
 
-		for j := range layers {
-			layers[j] += " "
+		if textToColor != "" && len(charsToColor) == 0 {
+			for i := 0; i < 8; i++ {
+				fmt.Println(selectedColor + layers[i] + colors["reset"])
+			}
+			fmt.Println()
+			return
 		}
-	}
 
-	if textToColor != "" && len(charsToColor) == 0 {
-		for i := 0; i < 8; i++ {
-			fmt.Println(selectedColor + layers[i] + colors["reset"])
+		// После обработки каждой строки выводим содержимое слоев и очищаем их для следующей строки
+		for _, layer := range layers {
+			fmt.Println(layer + colors["reset"])
 		}
-		fmt.Println()
-		return
-	}
-
-	for _, layer := range layers {
-		fmt.Println(layer + colors["reset"])
+		layers = [8]string{}
 	}
 	fmt.Println()
 }
@@ -96,12 +108,14 @@ func handleErrors(args []string) {
 		fmt.Println("Usage: go run . --color=<color> <text>")
 		os.Exit(1)
 	}
+
 	textArgs := args[2:]
 	if len(textArgs) == 0 {
 		fmt.Println("You must provide text to print")
 		os.Exit(1)
 	}
-	prefixes := []string{"--output", "--color", "--reverse"}
+
+	var prefixes = []string{"--output", "--color", "--reverse"}
 
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(args[2], prefix) {
