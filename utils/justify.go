@@ -9,15 +9,73 @@ import (
 )
 
 func Justify(flagValue string, text string, asciiArt map[rune][]string) {
-	var (
-		inputValue []string
-		layers     [8]string
-	)
+	var layers [8]string
+	var art string
+	var inputValue []string
 
 	width, _, err := getTerminalSize()
 	if err != nil {
 		fmt.Println("Error getting terminal size:", err)
 		return
+	}
+
+	lines := strings.Split(text, `\n`)
+	if flagValue == "justify" {
+		var extraSpaces int
+		for _, line := range lines {
+			if line == "" {
+				art = fmt.Sprint(art, "\n")
+			} else {
+				rows := [8][]string{}
+				rowLength := 0
+				spaceCount := 0
+				for i := 0; i < 8; i++ {
+					str := ""
+					for _, char := range line {
+						if char == ' ' {
+							rows[i] = append(rows[i], str)
+							str = ""
+							if i == 0 {
+								spaceCount++
+							}
+						} else {
+							str = fmt.Sprint(str, asciiArt[char][i])
+							if i == 0 {
+								rowLength += len(asciiArt[char][i])
+							}
+						}
+					}
+					rows[i] = append(rows[i], str)
+				}
+				if rowLength > width {
+					fmt.Println("Text is too long for terminal width!")
+					os.Exit(1)
+				}
+				totalSpaces := width - rowLength - spaceCount
+				spacesBetweenWords := 1
+				if spaceCount > 0 {
+					spacesBetweenWords += totalSpaces / spaceCount
+				}
+				if spaceCount != 0 {
+					extraSpaces = totalSpaces % spaceCount
+				}
+
+				for i := range rows {
+					row := ""
+					for j, word := range rows[i] {
+						row += word
+						if j < len(rows[i])-1 {
+							spacesToAdd := spacesBetweenWords
+							if extraSpaces > 0 {
+								extraSpaces--
+							}
+							row += strings.Repeat(" ", spacesToAdd)
+						}
+					}
+					fmt.Println(row)
+				}
+			}
+		}
 	}
 
 	for _, s := range text {
@@ -54,7 +112,6 @@ func Justify(flagValue string, text string, asciiArt map[rune][]string) {
 		printAlignedText(layer, flagValue, width)
 	}
 	fmt.Println()
-
 }
 
 func getTerminalSize() (width int, height int, err error) {
@@ -75,17 +132,18 @@ func getTerminalSize() (width int, height int, err error) {
 }
 
 func printAlignedText(layer string, alignment string, width int) {
-	spaces := 0
-	padding := ""
+	if len(layer) > width {
+		fmt.Println("Text is too long for terminal width!")
+		os.Exit(1)
+	}
 	switch alignment {
 	case "left":
+		fmt.Println(layer)
 	case "center":
-		spaces = (width - len(layer)) / 2
-		padding = strings.Repeat(" ", spaces)
+		padding := strings.Repeat(" ", (width-len(layer))/2)
+		fmt.Println(padding + layer)
 	case "right":
-		spaces = width - len(layer)
-		padding = strings.Repeat(" ", spaces)
-	case "justify":
+		padding := strings.Repeat(" ", width-len(layer))
+		fmt.Println(padding + layer)
 	}
-	fmt.Println(padding + layer)
 }

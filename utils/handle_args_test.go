@@ -23,7 +23,7 @@ package utils
 
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			if got, _ := HandleArgs(tt.args, _); got != tt.expected {
+// 			if got, _ := HandleArgs(tt.args); got != tt.expected {
 // 				t.Errorf("HandleArgs() = %v, expected %v", got, tt.expected)
 // 			}
 // 		})
